@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string
+    //   - photoURL: string
+    //   - role: string (required, enum: ['buyer', 'seller', 'admin'])
+    //   - createdAt: timestamp
+    //
+    // Collection: shops
+    // Document ID: {shopId}
+    // Fields:
+    //   - id: string (required)
+    //   - ownerUid: string (required)
+    //   - name: string (required)
+    //   - description: string
+    //   - logo: string
+    //   - rating: number
+    //   - followers: int
+    //   - location: map { lat: number, lng: number }
+    //   - createdAt: timestamp
+    //
+    // Collection: products
+    // Document ID: {productId}
+    // Fields:
+    //   - id: string (required)
+    //   - shopId: string (required)
+    //   - name: string (required)
+    //   - description: string
+    //   - price: number (required)
+    //   - category: string
+    //   - images: list
+    //   - stock: int
+    //   - createdAt: timestamp
+    //
+    // Collection: chats
+    // Document ID: {chatId}
+    // Fields:
+    //   - id: string (required)
+    //   - participants: list (required, uids)
+    //   - lastMessage: string
+    //   - updatedAt: timestamp
+    //
+    // Collection: chats/{chatId}/messages
+    // Document ID: {messageId}
+    // Fields:
+    //   - id: string (required)
+    //   - chatId: string (required)
+    //   - senderUid: string (required)
+    //   - text: string (required)
+    //   - timestamp: timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return isAuthenticated() &&
+        (user.role == 'admin' && user.adminAccessEnabled == true) ||
+        (request.auth.token.email == "azizbekbakirov39@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && 
+        request.auth.token.email == "azizbekbakirov39@gmail.com" && 
+        request.auth.token.email_verified == true;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.role in ['buyer', 'seller', 'admin'] &&
+             (data.role != 'admin' || isAdmin());
+    }
+
+    function isValidShop(data) {
+      return hasRequiredFields(['id', 'ownerUid', 'name']) &&
+             data.ownerUid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100;
+    }
+
+    function isValidProduct(data) {
+      return hasRequiredFields(['id', 'shopId', 'name', 'price']) &&
+             data.price is number && data.price >= 0 &&
+             data.name is string && data.name.size() > 0;
+    }
+
+    function isValidChat(data) {
+      return hasRequiredFields(['id', 'participants']) &&
+             data.participants is list &&
+             data.participants.size() >= 2 &&
+             request.auth.uid in data.participants;
+    }
+
+    function isValidMessage(data, chatId) {
+      return hasRequiredFields(['id', 'chatId', 'senderUid', 'text']) &&
+             data.chatId == chatId &&
+             data.senderUid == request.auth.uid &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 5000;
+    }
+
+    function isValidPost(data) {
+      return hasRequiredFields(['id', 'seller', 'mediaUrls', 'outfitName', 'price', 'likes', 'ownerUid']) &&
+             data.ownerUid == request.auth.uid &&
+             data.mediaUrls is list && data.mediaUrls.size() > 0 &&
+             data.likes is number && data.likes >= 0;
+    }
+
+    function isValidLike(data) {
+      return hasRequiredFields(['uid', 'postId']) &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidSavedItem(data) {
+      return hasRequiredFields(['uid', 'postId']) &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidSubscription(data) {
+      return hasRequiredFields(['uid', 'sellerId']) &&
+             data.uid == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Match Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                      (isOwner(uid) || isAdmin()) &&
+                      (request.resource.data.role == resource.data.role || isSuperAdmin()) &&
+                      (request.resource.data.adminAccessEnabled == resource.data.adminAccessEnabled || isSuperAdmin());
+    }
+
+    match /shops/{shopId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidShop(request.resource.data);
+      allow update: if isAuthenticated() && isValidShop(request.resource.data) && 
+                      (request.auth.uid == resource.data.ownerUid || isAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.ownerUid || isAdmin());
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow update: if isAuthenticated() && isValidPost(request.resource.data) && 
+                      (resource.data.ownerUid == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidLike(request.resource.data);
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    match /saved_items/{saveId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.uid;
+      allow create: if isAuthenticated() && isValidSavedItem(request.resource.data);
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    match /subscriptions/{subId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSubscription(request.resource.data);
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && (request.auth.uid in resource.data.participants || isAdmin());
+      allow create: if isAuthenticated() && isValidChat(request.resource.data);
+      allow update: if isAuthenticated() && (request.auth.uid in resource.data.participants || isAdmin());
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants || isAdmin());
+        allow create: if isAuthenticated() && isValidMessage(request.resource.data, chatId) && 
+                        (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

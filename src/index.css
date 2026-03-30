@@ -1,0 +1,58 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border-primary: var(--border-primary);
+  --color-header-bg: var(--header-bg);
+  --color-accent-blue: #0095FF;
+  --color-accent-light: #5AC8FA;
+  --color-accent-blue-bright: #007AFF;
+  --font-cursive: "Dancing Script", cursive;
+}
+
+:root {
+  /* Light Mode (90% White, 10% Black) */
+  --bg-primary: #e6e6e6;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4d4d4d;
+  --border-primary: rgba(0, 0, 0, 0.1);
+  --header-bg: #e6e6e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode */
+    --bg-primary: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --border-primary: rgba(255, 255, 255, 0.1);
+    --header-bg: #000000;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

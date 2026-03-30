@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string", "format": "uri" },
+        "role": { "type": "string", "enum": ["buyer", "seller", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Shop": {
+      "title": "Shop",
+      "description": "Seller's shop information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "logo": { "type": "string", "format": "uri" },
+        "rating": { "type": "number" },
+        "followers": { "type": "integer" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerUid", "name"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Post/Product information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "seller": { "$ref": "Shop" },
+        "mediaType": { "type": "string", "enum": ["video", "carousel"] },
+        "mediaUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "outfitName": { "type": "string" },
+        "price": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object" } },
+        "likes": { "type": "integer" },
+        "comments": { "type": "integer" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "integer" },
+        "inStock": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "seller", "mediaUrls", "outfitName", "price"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "User subscription to a shop",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "sellerId"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "Chat session between buyer and seller",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "participants"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Individual message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "senderUid": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "chatId", "senderUid", "text"]
+    },
+    "Story": {
+      "title": "Story",
+      "description": "Short-lived video content (24h)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "shopId": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "price": { "type": "string" },
+        "isLive": { "type": "boolean" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "shopId", "videoUrl"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "User like on a post",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "postId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "postId"]
+    },
+    "SavedItem": {
+      "title": "SavedItem",
+      "description": "User saved post",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "postId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "postId"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "User", "description": "User profiles" },
+    "/shops/{shopId}": { "schema": "Shop", "description": "Shop profiles" },
+    "/posts/{postId}": { "schema": "Post", "description": "Posts/Products" },
+    "/stories/{storyId}": { "schema": "Story", "description": "Stories" },
+    "/likes/{likeId}": { "schema": "Like", "description": "Likes" },
+    "/saved_items/{saveId}": { "schema": "SavedItem", "description": "Saved items" },
+    "/subscriptions/{subId}": { "schema": "Subscription", "description": "Shop subscriptions" },
+    "/chats/{chatId}": { "schema": "Chat", "description": "Chat sessions" },
+    "/chats/{chatId}/messages/{messageId}": { "schema": "Message", "description": "Messages" }
+  }
+}
