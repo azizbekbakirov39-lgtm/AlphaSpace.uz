@@ -1,5 +1,5 @@
 {
-  "name": "Remix: AlphaSpace",
+  "name": "AlphaSpace",
   "description": "Premium video-commerce marketplace for fashion and lifestyle with AI styling and interactive navigation.",
   "requestFramePermissions": [
     "geolocation",
