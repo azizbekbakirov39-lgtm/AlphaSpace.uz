@@ -249,6 +249,10 @@ export default function App() {
               adminAccessEnabled: isAdminEmail
             };
             
+            // Optimistic update for immediate UI feedback
+            setUser(newUser);
+            setLoading(false);
+            
             console.log("Saving new user to Firestore:", newUser);
             setDoc(userDoc, newUser)
               .then(() => {
@@ -257,16 +261,21 @@ export default function App() {
               })
               .catch(err => {
                 console.error("Error saving new user document:", err);
-                handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`);
+                setUser(null);
                 setLoading(false);
+                handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`);
               });
           } else {
+            // Optimistic update from getDoc before setting up listener
+            setUser(docSnap.data() as User);
+            setLoading(false);
             setupUserListener(userDoc);
           }
         }).catch(error => {
            console.error("Error checking user document:", error);
-           handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+           setUser(null);
            setLoading(false);
+           handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
         });
 
         const setupUserListener = (docRef: any) => {
@@ -279,8 +288,9 @@ export default function App() {
             }
           }, (error) => {
             console.error("Error in user document snapshot:", error);
-            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+            setUser(null);
             setLoading(false);
+            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
           });
         };
 
