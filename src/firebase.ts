@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User as FirebaseUser, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, orderBy, limit, getDocFromServer } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import firebaseConfig from '../firebase-applet-config.json';
@@ -10,6 +10,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+export const appleProvider = new OAuthProvider('apple.com');
 
 auth.languageCode = 'uz';
 
@@ -30,6 +31,46 @@ export const signInWithGoogle = async () => {
       return null;
     }
     console.error("Error signing in with Google:", error.code, error.message);
+    throw error;
+  }
+};
+
+export const signInWithApple = async () => {
+  try {
+    console.log("Starting Apple sign-in...");
+    const result = await signInWithPopup(auth, appleProvider);
+    console.log("Sign-in successful", result.user.email);
+    return result.user;
+  } catch (error: any) {
+    if (error.code === 'auth/popup-closed-by-user') {
+      console.log("Sign-in popup closed by user.");
+      return null;
+    }
+    if (error.code === 'auth/cancelled-popup-request') {
+      console.log("Sign-in popup request cancelled.");
+      return null;
+    }
+    console.error("Error signing in with Apple:", error.code, error.message);
+    throw error;
+  }
+};
+
+export const signUpWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error: any) {
+    console.error("Error signing up with email:", error.code, error.message);
+    throw error;
+  }
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    return result.user;
+  } catch (error: any) {
+    console.error("Error signing in with email:", error.code, error.message);
     throw error;
   }
 };
