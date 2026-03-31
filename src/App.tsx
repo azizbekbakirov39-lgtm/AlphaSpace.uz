@@ -937,8 +937,23 @@ export default function App() {
                 {/* Left Side */}
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-accent-blue to-accent-light w-14 h-14 rounded-2xl flex flex-col items-center justify-center shadow-lg shadow-accent-blue/20 border border-white/10">
-                    <Tag size={26} className="text-white mb-0.5" />
-                    <h1 className="text-[10px] font-cursive font-bold italic text-white leading-none">
+                    <svg width="44" height="44" viewBox="-3 0 27 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-[-4px]">
+                      {/* Thick Elegant White Chain Loop */}
+                      <path d="M6.5 6.5C4 6.5 -1 4.5 -3 2M6.5 6.5C5 8.5 -1 9 -3 7" stroke="white" strokeWidth="1.0" strokeLinecap="round" opacity="0.8" fill="none" />
+                      
+                      {/* Main Tag Body */}
+                      <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z" fill="white" />
+                      
+                      {/* Uniform Inner Blue Border - Closer to Edge */}
+                      <path d="M20.5 11.58l-8.5-8.5C11.7 2.7 11.3 2.5 11 2.5H4.5c-0.8 0-1.5 0.7-1.5 1.5v6.5c0 0.4 0.2 0.8 0.4 1.1l8.5 8.5c0.3 0.3 0.7 0.4 1.1 0.4s0.8-0.1 1.1-0.4l6.5-6.5c0.3-0.3 0.4-0.7 0.4-1.1s-0.1-0.8-0.4-1.1z" stroke="#3B82F6" strokeWidth="0.4" fill="none" opacity="0.5" />
+                      
+                      {/* Tag Hole */}
+                      <circle cx="6.5" cy="6.5" r="1.2" fill="#3B82F6" />
+                      
+                      {/* A.S Text - Centered in body */}
+                      <text x="12" y="14" fill="#3B82F6" style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }} textAnchor="middle" transform="rotate(45 12 14)">A.S</text>
+                    </svg>
+                    <h1 className="text-[12px] font-cursive font-bold italic text-white leading-none mt-[-2px]">
                       AlphaSpace
                     </h1>
                   </div>

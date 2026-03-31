@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tag } from 'lucide-react';
+import { Store } from 'lucide-react';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -32,17 +32,27 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           <motion.svg
             width="160"
             height="160"
-            viewBox="0 0 24 24"
+            viewBox="-3 0 27 24"
             fill="none"
-            stroke="white"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
             className="drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
           >
-            {/* Main Tag Path */}
+            {/* Thick Elegant White Chain Loop - Animated */}
             <motion.path
-              d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"
+              d="M6.5 6.5C4 6.5 -1 4.5 -3 2M6.5 6.5C5 8.5 -1 9 -3 7"
+              stroke="white"
+              strokeWidth="1.0"
+              strokeLinecap="round"
+              opacity="0.8"
+              fill="none"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 0.8 }}
+              transition={{ duration: 2, delay: 4.2 }}
+            />
+
+            {/* Main Tag Body - White */}
+            <motion.path
+              d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"
+              fill="white"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
               transition={{ 
@@ -51,16 +61,50 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 delay: 0.5 
               }}
             />
-            {/* Tag Hole */}
+
+            {/* Uniform Inner Blue Border - Closer to Edge */}
             <motion.path
-              d="M7 7h.01"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
+              d="M20.5 11.58l-8.5-8.5C11.7 2.7 11.3 2.5 11 2.5H4.5c-0.8 0-1.5 0.7-1.5 1.5v6.5c0 0.4 0.2 0.8 0.4 1.1l8.5 8.5c0.3 0.3 0.7 0.4 1.1 0.4s0.8-0.1 1.1-0.4l6.5-6.5c0.3-0.3 0.4-0.7 0.4-1.1s-0.1-0.8-0.4-1.1z"
+              stroke="#3B82F6"
+              strokeWidth="0.4"
+              fill="none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              transition={{ duration: 1, delay: 3.8 }}
+            />
+
+            {/* Tag Hole - Blue */}
+            <motion.circle
+              cx="6.5"
+              cy="6.5"
+              r="1.2"
+              fill="#3B82F6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ 
                 duration: 0.8, 
                 delay: 2.8 
               }}
             />
+
+            {/* A.S Text - Centered in body */}
+            <motion.text
+              x="12"
+              y="14"
+              fill="#3B82F6"
+              style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }}
+              textAnchor="middle"
+              transform="rotate(45 12 14)"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 1.5, 
+                delay: 3.5,
+                ease: "easeOut"
+              }}
+            >
+              A.S
+            </motion.text>
           </motion.svg>
           
           {/* Subtle Glow */}
