@@ -6,19 +6,27 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 const imageOptions = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1920,
-  useWebWorker: true,
+  useWebWorker: false, // Disabled to prevent hanging in iframe/restricted environments
   initialQuality: 0.8,
 };
 
 export async function compressImage(file: File): Promise<File> {
   try {
     console.log(`Original image size: ${file.size / 1024 / 1024} MB`);
-    const compressedFile = await imageCompression(file, imageOptions);
+    
+    // Add a 15-second timeout to prevent indefinite hanging
+    const timeoutPromise = new Promise<File>((_, reject) => 
+      setTimeout(() => reject(new Error('Image compression timed out')), 15000)
+    );
+    
+    const compressionPromise = imageCompression(file, imageOptions);
+    
+    const compressedFile = await Promise.race([compressionPromise, timeoutPromise]);
     console.log(`Compressed image size: ${compressedFile.size / 1024 / 1024} MB`);
     return compressedFile;
   } catch (error) {
-    console.error('Image compression error:', error);
-    return file; // Return original if fails
+    console.error('Image compression error or timeout:', error);
+    return file; // Return original if fails or times out
   }
 }
 
@@ -50,7 +58,18 @@ export async function compressVideo(
       return file;
     }
 
-    const instance = await loadFFmpeg();
+    // Check if SharedArrayBuffer is available (required for FFmpeg in many browsers)
+    if (typeof SharedArrayBuffer === 'undefined') {
+      console.warn('SharedArrayBuffer is not available in this environment. Skipping video compression.');
+      return file;
+    }
+
+    // Add a 60-second timeout for FFmpeg loading
+    const timeoutPromise = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error('FFmpeg loading timed out')), 60000)
+    );
+
+    const instance = await Promise.race([loadFFmpeg(), timeoutPromise]);
     const inputName = 'input.mp4';
     const outputName = 'output.mp4';
 
