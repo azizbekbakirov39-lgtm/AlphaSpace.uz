@@ -11,10 +11,14 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
+auth.languageCode = 'uz';
+
 // Auth Helpers
 export const signInWithGoogle = async () => {
   try {
+    console.log("Starting Google sign-in...");
     const result = await signInWithPopup(auth, googleProvider);
+    console.log("Sign-in successful", result.user.email);
     return result.user;
   } catch (error: any) {
     if (error.code === 'auth/popup-closed-by-user') {
@@ -25,7 +29,7 @@ export const signInWithGoogle = async () => {
       console.log("Sign-in popup request cancelled.");
       return null;
     }
-    console.error("Error signing in with Google", error);
+    console.error("Error signing in with Google:", error.code, error.message);
     throw error;
   }
 };

@@ -32,6 +32,7 @@ import {
   setDoc, 
   updateDoc, 
   getDoc, 
+  addDoc,
   deleteDoc, 
   collection, 
   query, 
@@ -70,6 +71,7 @@ export default function App() {
   const [profileSubView, setProfileSubView] = useState<SubView>('main');
   const [selectedPostForDetails, setSelectedPostForDetails] = useState<any | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<any | null>(null);
+  const [activeComments, setActiveComments] = useState<any[]>([]);
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiFoundPosts, setAiFoundPosts] = useState<any[]>([]);
   const [aiFoundObrazlar, setAiFoundObrazlar] = useState<any[]>([]);
@@ -97,10 +99,16 @@ export default function App() {
       if (storiesData.length > 0) setStories(storiesData);
     }, (error) => handleFirestoreError(error, OperationType.GET, 'stories'));
 
+    const unsubObrazlar = onSnapshot(collection(db, 'obrazlar'), (snapshot) => {
+      const obrazlarData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (obrazlarData.length > 0) setObrazlar(obrazlarData);
+    }, (error) => handleFirestoreError(error, OperationType.GET, 'obrazlar'));
+
     return () => {
       unsubSellers();
       unsubPosts();
       unsubStories();
+      unsubObrazlar();
     };
   }, []);
 
@@ -147,6 +155,28 @@ export default function App() {
     };
   }, [user]);
 
+  // Comments Listener
+  React.useEffect(() => {
+    if (!selectedPostForComments) {
+      setActiveComments([]);
+      return;
+    }
+
+    const unsubComments = onSnapshot(
+      query(
+        collection(db, 'comments'), 
+        where('postId', '==', selectedPostForComments.id),
+        orderBy('createdAt', 'desc')
+      ), 
+      (snapshot) => {
+        setActiveComments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, 
+      (error) => handleFirestoreError(error, OperationType.GET, 'comments')
+    );
+
+    return () => unsubComments();
+  }, [selectedPostForComments]);
+
   // Merge user-specific data into posts/stories
   const postsWithUserStatus = React.useMemo(() => {
     return posts.map(post => ({
@@ -186,38 +216,70 @@ export default function App() {
 
   // Firebase Auth Listener
   React.useEffect(() => {
+    let unsubUser: (() => void) | null = null;
+
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      console.log("Auth state changed:", firebaseUser ? `User logged in: ${firebaseUser.email}` : "User logged out");
+      
+      // Clean up previous user listener
+      if (unsubUser) {
+        unsubUser();
+        unsubUser = null;
+      }
+
       if (firebaseUser) {
-        // Check if user exists in Firestore
         const userDoc = doc(db, 'users', firebaseUser.uid);
+        console.log("Fetching user document for UID:", firebaseUser.uid);
+        
         // Using onSnapshot for real-time user data
-        const unsubUser = onSnapshot(userDoc, (docSnap) => {
+        unsubUser = onSnapshot(userDoc, (docSnap) => {
           if (docSnap.exists()) {
-            setUser(docSnap.data() as User);
+            const userData = docSnap.data() as User;
+            console.log("User document found:", userData);
+            setUser(userData);
+            setLoading(false);
           } else {
+            console.log("User document not found, creating new profile...");
             // Create new user profile if it doesn't exist
-            const isAdminEmail = firebaseUser.email === "azizbekbakirov39@gmail.com" || firebaseUser.email === "azizbekbakirov990@gmail.com";
+            const email = firebaseUser.email || "";
+            const isAdminEmail = email === "azizbekbakirov39@gmail.com" || email === "azizbekbakirov990@gmail.com";
+            
             const newUser: User = {
               uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
+              email: email,
+              displayName: firebaseUser.displayName || "Foydalanuvchi",
+              photoURL: firebaseUser.photoURL || null,
               role: isAdminEmail ? 'admin' : 'buyer',
               hasShop: false,
               adminAccessEnabled: isAdminEmail // Enable access for admin emails by default
             };
-            setDoc(userDoc, newUser).catch(err => handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`));
+            
+            console.log("Saving new user to Firestore:", newUser);
+            setDoc(userDoc, newUser)
+              .then(() => console.log("New user document saved successfully"))
+              .catch(err => {
+                console.error("Error saving new user document:", err);
+                handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`);
+              });
+            
             setUser(newUser);
+            setLoading(false);
           }
+        }, (error) => {
+          console.error("Error in user document snapshot:", error);
+          handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
           setLoading(false);
-        }, (error) => handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`));
-        return () => unsubUser();
+        });
       } else {
         setUser(null);
         setLoading(false);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      if (unsubUser) unsubUser();
+    };
   }, []);
 
   // History tracking to prevent double pushes
@@ -253,10 +315,19 @@ export default function App() {
   const t = translations[language];
 
   const handleLogin = async () => {
+    console.log("handleLogin triggered");
+    toast.info("Google orqali kirish boshlanmoqda...");
     try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error("Login failed", error);
+      const loggedInUser = await signInWithGoogle();
+      if (loggedInUser) {
+        console.log("Login success in handleLogin:", loggedInUser.email);
+        toast.success("Tizimga muvaffaqiyatli kirdingiz!");
+      } else {
+        console.log("Login cancelled or returned null");
+      }
+    } catch (error: any) {
+      console.error("Login failed in handleLogin:", error);
+      toast.error(`Kirishda xatolik: ${error.message || "Noma'lum xatolik"}`);
     }
   };
 
@@ -622,6 +693,30 @@ export default function App() {
     if (!sharingPost) return;
     handleOpenChat(sellerId, sharingPost);
     setSharingPost(null);
+  };
+
+  const handleAddComment = async (postId: string, text: string) => {
+    if (!user || !text.trim()) return;
+
+    try {
+      await addDoc(collection(db, 'comments'), {
+        postId,
+        uid: user.uid,
+        user: user.displayName || user.email?.split('@')[0] || 'User',
+        text,
+        createdAt: new Date().toISOString(),
+        time: 'hozir'
+      });
+      
+      // Update comment count on the post
+      const postRef = doc(db, 'posts', postId);
+      const postDoc = await getDoc(postRef);
+      if (postDoc.exists()) {
+        await updateDoc(postRef, { comments: (postDoc.data()?.comments || 0) + 1 });
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'comments');
+    }
   };
 
   const closePostDetails = React.useCallback(() => {
@@ -1258,6 +1353,10 @@ export default function App() {
                 isOpen={!!selectedPostForComments} 
                 onClose={closePostComments} 
                 postTitle={selectedPostForComments.seller.name}
+                postId={selectedPostForComments.id}
+                comments={activeComments}
+                onAddComment={handleAddComment}
+                user={user}
               />
             )}
 

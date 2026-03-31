@@ -59,6 +59,26 @@ service cloud.firestore {
     //   - text: string (required)
     //   - timestamp: timestamp
     //
+    // Collection: obrazlar
+    // Document ID: {obrazId}
+    // Fields:
+    //   - id: string (required)
+    //   - title: string (required)
+    //   - description: string
+    //   - posts: list (PostData objects)
+    //   - totalPrice: string
+    //   - type: string
+    //
+    // Collection: comments
+    // Document ID: {commentId}
+    // Fields:
+    //   - postId: string (required)
+    //   - uid: string (required)
+    //   - user: string (required)
+    //   - text: string (required)
+    //   - createdAt: string
+    //   - time: string
+    //
     // ===============================================================
 
     // ===============================================================
@@ -74,10 +94,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let userDoc = /databases/$(database)/documents/users/$(request.auth.uid);
       return isAuthenticated() &&
-        (user.role == 'admin' && user.adminAccessEnabled == true) ||
-        (request.auth.token.email == "azizbekbakirov39@gmail.com" && request.auth.token.email_verified == true);
+        ((exists(userDoc) && get(userDoc).data.role == 'admin' && get(userDoc).data.adminAccessEnabled == true) ||
+         (request.auth.token.email == "azizbekbakirov39@gmail.com" || request.auth.token.email == "azizbekbakirov990@gmail.com") && 
+         request.auth.token.email_verified == true);
     }
 
     function isSuperAdmin() {
@@ -158,12 +179,24 @@ service cloud.firestore {
              data.uid == request.auth.uid;
     }
 
+    function isValidComment(data) {
+      return hasRequiredFields(['postId', 'uid', 'user', 'text']) &&
+             data.uid == request.auth.uid &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 1000;
+    }
+
+    function isValidObraz(data) {
+      return hasRequiredFields(['id', 'title', 'posts']) &&
+             data.title is string && data.title.size() > 0 &&
+             data.posts is list;
+    }
+
     // ===============================================================
     // Match Rules
     // ===============================================================
 
     match /users/{uid} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (isOwner(uid) || isAdmin());
       allow create: if isAuthenticated() && isValidUser(request.resource.data);
       allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
                       (isOwner(uid) || isAdmin()) &&
@@ -182,15 +215,21 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if true;
       allow create: if isAuthenticated() && isValidPost(request.resource.data);
-      allow update: if isAuthenticated() && isValidPost(request.resource.data) && 
-                      (resource.data.ownerUid == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (
+                      (isValidPost(request.resource.data) && (resource.data.ownerUid == request.auth.uid || isAdmin())) ||
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) && request.resource.data.likes is number) ||
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments']) && request.resource.data.comments is number)
+                    );
       allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
     }
 
     match /stories/{storyId} {
       allow read: if true;
       allow create: if isAuthenticated() && request.resource.data.ownerUid == request.auth.uid;
-      allow update: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (
+                      (resource.data.ownerUid == request.auth.uid || isAdmin()) ||
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) && request.resource.data.likes is number)
+                    );
       allow delete: if isAuthenticated() && (resource.data.ownerUid == request.auth.uid || isAdmin());
     }
 
@@ -210,6 +249,17 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidSubscription(request.resource.data);
       allow delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    match /obrazlar/{obrazId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidComment(request.resource.data);
+      allow update, delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
     match /chats/{chatId} {

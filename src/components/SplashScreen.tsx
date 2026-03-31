@@ -26,7 +26,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       transition={{ duration: 0.8 }}
       className="fixed inset-0 z-[9999] bg-gradient-to-br from-[#007AFF] to-[#5AC8FA] flex flex-col items-center justify-center overflow-hidden"
     >
-      <div className="flex flex-col items-center gap-16">
+      <div className="flex flex-col items-center gap-10">
         {/* Large Animated Logo (Tag Icon) */}
         <div className="relative">
           <motion.svg
