@@ -1070,7 +1070,7 @@ export default function App() {
                       <circle cx="6.5" cy="6.5" r="1.2" fill="#3B82F6" />
                       
                       {/* A.S Text - Centered in body */}
-                      <text x="12" y="14" fill="#3B82F6" style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }} textAnchor="middle" transform="rotate(45 12 14)">A.S</text>
+                      <text x="12" y="14" fill="#3B82F6" style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }} textAnchor="middle">A.S</text>
                     </svg>
                     <h1 className="text-[12px] font-cursive font-bold italic text-white leading-none mt-[-2px]">
                       AlphaSpace

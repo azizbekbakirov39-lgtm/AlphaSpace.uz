@@ -94,7 +94,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
               fill="#3B82F6"
               style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }}
               textAnchor="middle"
-              transform="rotate(45 12 14)"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ 
