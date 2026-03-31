@@ -49,9 +49,9 @@ import {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [posts, setPosts] = useState(MOCK_POSTS);
-  const [stories, setStories] = useState(MOCK_STORIES);
-  const [sellers, setSellers] = useState(MOCK_SELLERS);
+  const [posts, setPosts] = useState<PostData[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
   const [obrazlar, setObrazlar] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('Home');
@@ -674,22 +674,51 @@ export default function App() {
   }, [activeTab, workspace, profileSubView]);
 
   const handleRefresh = React.useCallback(() => {
-    // Shuffle posts to simulate refresh
-    setPosts(prev => [...prev].sort(() => Math.random() - 0.5));
-    // Also shuffle stories
-    setStories(prev => [...prev].sort(() => Math.random() - 0.5));
-  }, []);
+    // In a real app, we'd re-fetch from Firestore
+    // For now, we'll just trigger a re-render or let the snapshot listeners handle it
+    toast.info(language === 'uz' ? "Ma'lumotlar yangilanmoqda..." : "Refreshing data...");
+  }, [language]);
 
   const handleBrandsRefresh = React.useCallback(() => {
     // Sort sellers: subscribed first, then by followers count
     setSellers(prev => [...prev].sort((a, b) => {
-      if (a.isSubscribed && !b.isSubscribed) return -1;
-      if (!a.isSubscribed && b.isSubscribed) return 1;
+      const aSub = userSubscriptions.has(a.id);
+      const bSub = userSubscriptions.has(b.id);
+      if (aSub && !bSub) return -1;
+      if (!aSub && bSub) return 1;
       return b.followers - a.followers;
     }));
-    // Also shuffle stories to match
-    setStories(prev => [...prev].sort(() => Math.random() - 0.5));
-  }, []);
+  }, [userSubscriptions]);
+
+  const seedDatabase = async () => {
+    if (!user || user.role !== 'admin') return;
+    
+    toast.loading(language === 'uz' ? "Ma'lumotlar bazasi to'ldirilmoqda..." : "Seeding database...");
+    
+    try {
+      // Seed Sellers
+      for (const seller of MOCK_SELLERS) {
+        await setDoc(doc(db, 'shops', seller.id), seller);
+      }
+      
+      // Seed Posts
+      for (const post of MOCK_POSTS) {
+        await setDoc(doc(db, 'posts', post.id), post);
+      }
+      
+      // Seed Stories
+      for (const story of MOCK_STORIES) {
+        await setDoc(doc(db, 'stories', story.id), story);
+      }
+      
+      toast.dismiss();
+      toast.success(language === 'uz' ? "Ma'lumotlar muvaffaqiyatli yuklandi!" : "Database seeded successfully!");
+    } catch (error) {
+      toast.dismiss();
+      handleFirestoreError(error, OperationType.WRITE, 'seed');
+      toast.error("Xatolik yuz berdi!");
+    }
+  };
 
   // Back Button Logic
   React.useEffect(() => {
