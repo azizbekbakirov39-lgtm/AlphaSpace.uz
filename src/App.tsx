@@ -232,16 +232,10 @@ export default function App() {
         const userDoc = doc(db, 'users', firebaseUser.uid);
         console.log("Fetching user document for UID:", firebaseUser.uid);
         
-        // Using onSnapshot for real-time user data
-        unsubUser = onSnapshot(userDoc, (docSnap) => {
-          if (docSnap.exists()) {
-            const userData = docSnap.data() as User;
-            console.log("User document found:", userData);
-            setUser(userData);
-            setLoading(false);
-          } else {
+        // First check if user exists using getDoc to avoid onSnapshot permission errors on non-existent docs
+        getDoc(userDoc).then((docSnap) => {
+          if (!docSnap.exists()) {
             console.log("User document not found, creating new profile...");
-            // Create new user profile if it doesn't exist
             const email = firebaseUser.email || "";
             const isAdminEmail = email === "azizbekbakirov39@gmail.com" || email === "azizbekbakirov990@gmail.com";
             
@@ -252,25 +246,44 @@ export default function App() {
               photoURL: firebaseUser.photoURL || null,
               role: isAdminEmail ? 'admin' : 'buyer',
               hasShop: false,
-              adminAccessEnabled: isAdminEmail // Enable access for admin emails by default
+              adminAccessEnabled: isAdminEmail
             };
             
             console.log("Saving new user to Firestore:", newUser);
             setDoc(userDoc, newUser)
-              .then(() => console.log("New user document saved successfully"))
+              .then(() => {
+                console.log("New user document saved successfully");
+                setupUserListener(userDoc);
+              })
               .catch(err => {
                 console.error("Error saving new user document:", err);
                 handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`);
+                setLoading(false);
               });
-            
-            setUser(newUser);
-            setLoading(false);
+          } else {
+            setupUserListener(userDoc);
           }
-        }, (error) => {
-          console.error("Error in user document snapshot:", error);
-          handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
-          setLoading(false);
+        }).catch(error => {
+           console.error("Error checking user document:", error);
+           handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+           setLoading(false);
         });
+
+        const setupUserListener = (docRef: any) => {
+          unsubUser = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const userData = docSnap.data() as User;
+              console.log("User document found/updated:", userData);
+              setUser(userData);
+              setLoading(false);
+            }
+          }, (error) => {
+            console.error("Error in user document snapshot:", error);
+            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+            setLoading(false);
+          });
+        };
+
       } else {
         setUser(null);
         setLoading(false);

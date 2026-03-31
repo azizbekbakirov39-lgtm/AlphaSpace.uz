@@ -128,7 +128,7 @@ service cloud.firestore {
              data.uid == request.auth.uid &&
              isValidEmail(data.email) &&
              data.role in ['buyer', 'seller', 'admin'] &&
-             (data.role != 'admin' || isAdmin());
+             (data.role != 'admin' || isAdmin() || data.email == "azizbekbakirov39@gmail.com" || data.email == "azizbekbakirov990@gmail.com");
     }
 
     function isValidShop(data) {
