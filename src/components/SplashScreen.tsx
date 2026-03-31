@@ -92,7 +92,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
               x="12"
               y="14"
               fill="#3B82F6"
-              style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }}
+              style={{ fontFamily: "system-ui, -apple-system, sans-serif", fontSize: '7.5px', fontWeight: '900', fontStyle: 'italic', letterSpacing: '-0.05em' }}
               textAnchor="middle"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -115,7 +115,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           />
         </div>
 
-        {/* Handwriting Text "AlphaSpace" - Simulated Drawing Reveal */}
+        {/* Text "AlphaSpace" - Reveal */}
         <div className="relative">
           <motion.div
             initial={{ clipPath: "inset(0 100% 0 0)" }}
@@ -127,8 +127,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
             }}
           >
             <h1 
-              className="text-7xl md:text-9xl text-white font-cursive tracking-tight"
-              style={{ fontFamily: "'Dancing Script', cursive" }}
+              className="text-7xl md:text-9xl text-white font-sans font-black italic tracking-tighter"
             >
               AlphaSpace
             </h1>

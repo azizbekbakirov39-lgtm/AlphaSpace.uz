@@ -1070,9 +1070,9 @@ export default function App() {
                       <circle cx="6.5" cy="6.5" r="1.2" fill="#3B82F6" />
                       
                       {/* A.S Text - Centered in body */}
-                      <text x="12" y="14" fill="#3B82F6" style={{ fontFamily: "'Dancing Script', cursive", fontSize: '7.5px', fontWeight: '1000' }} textAnchor="middle">A.S</text>
+                      <text x="12" y="14" fill="#3B82F6" style={{ fontFamily: "system-ui, -apple-system, sans-serif", fontSize: '7.5px', fontWeight: '900', fontStyle: 'italic', letterSpacing: '-0.05em' }} textAnchor="middle">A.S</text>
                     </svg>
-                    <h1 className="text-[12px] font-cursive font-bold italic text-white leading-none mt-[-2px]">
+                    <h1 className="text-[12px] font-sans font-black italic tracking-tighter text-white leading-none mt-[-2px]">
                       AlphaSpace
                     </h1>
                   </div>
@@ -1080,7 +1080,7 @@ export default function App() {
 
                 {/* Middle Branding Text - Instagram Style */}
                 <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
-                  <h1 className="text-4xl font-cursive font-bold italic bg-gradient-to-br from-accent-blue to-accent-light bg-clip-text text-transparent tracking-tight">
+                  <h1 className="text-4xl font-sans font-black italic bg-gradient-to-br from-accent-blue to-accent-light bg-clip-text text-transparent tracking-tighter">
                     AlphaSpace
                   </h1>
                 </div>

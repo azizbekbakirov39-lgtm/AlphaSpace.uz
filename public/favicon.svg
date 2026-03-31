@@ -5,8 +5,7 @@
       <stop offset="1" stop-color="#60A5FA" />
     </linearGradient>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&amp;display=swap');
-      .text { font-family: 'Dancing Script', 'Brush Script MT', 'Apple Chancery', cursive, serif; font-size: 7.5px; font-weight: 700; fill: #3B82F6; }
+      .text { font-family: system-ui, -apple-system, sans-serif; font-size: 7.5px; font-weight: 900; font-style: italic; fill: #3B82F6; letter-spacing: -0.05em; }
     </style>
   </defs>
   <rect width="512" height="512" rx="120" fill="url(#bg)" />
