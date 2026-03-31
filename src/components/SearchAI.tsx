@@ -23,8 +23,6 @@ interface SearchAIProps {
   onOpenPostDetails: (post: PostData) => void;
   globalMuted: boolean;
   setGlobalMuted: (muted: boolean) => void;
-  allPosts: PostData[];
-  allSellers: Seller[];
 }
 
 const QUICK_PROMPTS = [
@@ -46,9 +44,7 @@ const SearchAI: React.FC<SearchAIProps> = ({
   setFoundObrazlar,
   onOpenPostDetails,
   globalMuted,
-  setGlobalMuted,
-  allPosts,
-  allSellers
+  setGlobalMuted
 }) => {
   const t = translations[language];
   const { isKeyboardOpen, keyboardHeight } = useKeyboard();
@@ -374,11 +370,8 @@ const SearchAI: React.FC<SearchAIProps> = ({
         8. XOTIRA: Agar foydalanuvchi biror ma'lumotni eslab qolishni so'rasa (masalan: "Ismim Azizbek, eslab qol"), javobingizda JSON formatida "saveToMemory" maydonini qo'shing.
         9. LOGO/RASM: Agar foydalanuvchi logo yaratishni yoki biror rasm chizishni so'rasa, javobingizda JSON formatida "generateImagePrompt" maydonini qo'shing. Bu maydonda rasm uchun ingliz tilida batafsil tavsif (prompt) bo'lishi kerak.
         
-        Mavjud to'plamlar (Haqiqiy ma'lumotlar bazasi):
-        ${allPosts.map(p => `ID: ${p.id}, Nomi: ${p.outfitName}, Brend: ${p.seller.name}, Xudud: ${p.seller.region}, Narxi: ${p.price}`).join('\n')}
-        
-        Sotuvchilar:
-        ${allSellers.map(s => `ID: ${s.id}, Nomi: ${s.name}, Region: ${s.region}`).join('\n')}
+        Mavjud to'plamlar:
+        ${MOCK_POSTS.map(p => `ID: ${p.id}, Nomi: ${p.outfitName}, Brend: ${p.seller.name}, Xudud: ${p.seller.region}, Narxi: ${p.price}`).join('\n')}
         
         Javobingizni JSON formatida bering:
         {
@@ -563,7 +556,7 @@ const SearchAI: React.FC<SearchAIProps> = ({
       ));
 
       if (data.recommendedPostIds && data.recommendedPostIds.length > 0) {
-        const posts = allPosts.filter(p => data.recommendedPostIds.includes(p.id));
+        const posts = MOCK_POSTS.filter(p => data.recommendedPostIds.includes(p.id));
         if (posts.length > 0) {
           setFoundPosts(posts);
           setFoundObrazlar([]); // Clear obrazlar if single posts are found
@@ -1081,7 +1074,7 @@ const SearchAI: React.FC<SearchAIProps> = ({
           {/* Input Area - Positioned higher to clear bottom tabs */}
           <div 
             className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-bg-primary via-bg-primary/95 to-transparent z-40"
-            style={{ paddingBottom: isKeyboardOpen ? `${keyboardHeight + 16}px` : '6rem' }}
+            style={{ paddingBottom: isKeyboardOpen ? `${keyboardHeight + 16}px` : '8rem' }}
           >
             <div className="max-w-md mx-auto space-y-3">
               <AnimatePresence>

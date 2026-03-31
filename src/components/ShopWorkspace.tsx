@@ -807,7 +807,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
     switch (activeTab) {
       case 'MyShop':
         return (
-          <div className="h-full overflow-y-auto scrollbar-hide pb-24">
+          <div className="h-full overflow-y-auto scrollbar-hide pb-32">
             {/* Hero Section */}
             <div className="relative h-[300px] w-full overflow-hidden">
               <img 
@@ -1201,7 +1201,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
         );
       case 'Statistics':
         return (
-          <div className="h-full overflow-y-auto scrollbar-hide p-6 pb-24 bg-bg-primary">
+          <div className="h-full overflow-y-auto scrollbar-hide p-6 pb-32 bg-bg-primary">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-black italic tracking-tighter uppercase text-text-primary">Statistika</h2>
@@ -1396,7 +1396,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
                   </div>
 
                   {/* Chat List */}
-                  <div className="flex-1 overflow-y-auto px-4 pb-24 scrollbar-hide">
+                  <div className="flex-1 overflow-y-auto px-4 pb-32 scrollbar-hide">
                     <div className="flex flex-col gap-2">
                       {filteredChats.length > 0 ? filteredChats.map(chat => (
                         <motion.div 
@@ -1973,7 +1973,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
         );
       case 'Premium':
         return (
-          <div className="h-full overflow-y-auto scrollbar-hide p-6 pb-24 bg-bg-primary">
+          <div className="h-full overflow-y-auto scrollbar-hide p-6 pb-32 bg-bg-primary">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-black italic tracking-tighter uppercase text-text-primary">Premium</h2>
@@ -2118,7 +2118,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
         );
       case 'Settings':
         return (
-          <div className="h-full overflow-y-auto scrollbar-hide p-4 pb-24 bg-bg-primary">
+          <div className="h-full overflow-y-auto scrollbar-hide p-4 pb-32 bg-bg-primary">
             <div className="flex items-center gap-4 mb-6">
               <button 
                 onClick={() => handleTabChange('MyShop')}

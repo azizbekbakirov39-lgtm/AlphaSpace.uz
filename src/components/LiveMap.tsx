@@ -145,7 +145,7 @@ const LiveMap: React.FC<LiveMapProps> = ({ language, onOpenShopProfile, onSearch
   };
 
   return (
-    <div className="h-full w-full relative bg-bg-primary overflow-hidden">
+    <div className="h-full w-full relative bg-bg-primary overflow-hidden pb-24">
       {/* Error Toast */}
       <AnimatePresence>
         {error && (
