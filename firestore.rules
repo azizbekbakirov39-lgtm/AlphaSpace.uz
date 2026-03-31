@@ -132,36 +132,37 @@ service cloud.firestore {
     }
 
     function isValidShop(data) {
-      return hasRequiredFields(['id', 'ownerUid', 'name']) &&
+      return hasRequiredFields(['ownerUid', 'name']) &&
              data.ownerUid == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100;
     }
 
     function isValidProduct(data) {
-      return hasRequiredFields(['id', 'shopId', 'name', 'price']) &&
+      return hasRequiredFields(['shopId', 'name', 'price']) &&
              data.price is number && data.price >= 0 &&
              data.name is string && data.name.size() > 0;
     }
 
     function isValidChat(data) {
-      return hasRequiredFields(['id', 'participants']) &&
+      return hasRequiredFields(['participants']) &&
              data.participants is list &&
              data.participants.size() >= 2 &&
              request.auth.uid in data.participants;
     }
 
     function isValidMessage(data, chatId) {
-      return hasRequiredFields(['id', 'chatId', 'senderUid', 'text']) &&
+      return hasRequiredFields(['chatId', 'senderUid', 'text']) &&
              data.chatId == chatId &&
              data.senderUid == request.auth.uid &&
              data.text is string && data.text.size() > 0 && data.text.size() < 5000;
     }
 
     function isValidPost(data) {
-      return hasRequiredFields(['id', 'seller', 'mediaUrls', 'outfitName', 'price', 'likes', 'ownerUid']) &&
+      return hasRequiredFields(['sellerId', 'mediaUrls', 'outfitName', 'price', 'likes', 'ownerUid']) &&
              data.ownerUid == request.auth.uid &&
              data.mediaUrls is list && data.mediaUrls.size() > 0 &&
-             data.likes is number && data.likes >= 0;
+             data.likes is number && data.likes >= 0 &&
+             (data.price is string || data.price is number);
     }
 
     function isValidLike(data) {
@@ -186,7 +187,7 @@ service cloud.firestore {
     }
 
     function isValidObraz(data) {
-      return hasRequiredFields(['id', 'title', 'posts']) &&
+      return hasRequiredFields(['title', 'posts']) &&
              data.title is string && data.title.size() > 0 &&
              data.posts is list;
     }

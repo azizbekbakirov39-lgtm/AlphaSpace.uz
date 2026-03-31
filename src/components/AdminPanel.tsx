@@ -6,7 +6,7 @@ import {
   ShieldAlert, ShieldCheck, UserCheck, UserMinus,
   RefreshCw, MoreVertical, LogOut, ChevronRight
 } from 'lucide-react';
-import { db, collection, onSnapshot, updateDoc, doc, deleteDoc } from '../firebase';
+import { db, collection, onSnapshot, updateDoc, doc, deleteDoc, query, limit } from '../firebase';
 import { User } from '../types';
 import { toast } from 'sonner';
 
@@ -27,7 +27,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, currentUser })
   useEffect(() => {
     if (!isOpen) return;
 
-    const unsub = onSnapshot(collection(db, 'users'), (snapshot) => {
+    const unsub = onSnapshot(query(collection(db, 'users'), limit(100)), (snapshot) => {
       const usersData = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as User));
       setUsers(usersData);
       setLoading(false);

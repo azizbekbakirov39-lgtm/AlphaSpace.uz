@@ -84,22 +84,22 @@ export default function App() {
   
   // Firestore Real-time Listeners
   React.useEffect(() => {
-    const unsubSellers = onSnapshot(collection(db, 'shops'), (snapshot) => {
+    const unsubSellers = onSnapshot(query(collection(db, 'shops'), limit(50)), (snapshot) => {
       const sellersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Seller));
       if (sellersData.length > 0) setSellers(sellersData);
     }, (error) => handleFirestoreError(error, OperationType.GET, 'shops'));
 
-    const unsubPosts = onSnapshot(collection(db, 'posts'), (snapshot) => {
+    const unsubPosts = onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(100)), (snapshot) => {
       const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PostData));
       if (postsData.length > 0) setPosts(postsData);
     }, (error) => handleFirestoreError(error, OperationType.GET, 'posts'));
 
-    const unsubStories = onSnapshot(collection(db, 'stories'), (snapshot) => {
+    const unsubStories = onSnapshot(query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(50)), (snapshot) => {
       const storiesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Story));
       if (storiesData.length > 0) setStories(storiesData);
     }, (error) => handleFirestoreError(error, OperationType.GET, 'stories'));
 
-    const unsubObrazlar = onSnapshot(collection(db, 'obrazlar'), (snapshot) => {
+    const unsubObrazlar = onSnapshot(query(collection(db, 'obrazlar'), limit(20)), (snapshot) => {
       const obrazlarData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       if (obrazlarData.length > 0) setObrazlar(obrazlarData);
     }, (error) => handleFirestoreError(error, OperationType.GET, 'obrazlar'));
@@ -166,7 +166,8 @@ export default function App() {
       query(
         collection(db, 'comments'), 
         where('postId', '==', selectedPostForComments.id),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(50)
       ), 
       (snapshot) => {
         setActiveComments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));

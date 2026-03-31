@@ -63,7 +63,7 @@ import {
 import { Language, translations } from '../translations';
 import { toast } from 'sonner';
 import { Seller, PostData, SellerCategory, SELLER_CATEGORIES, Obraz, User } from '../types';
-import { db, storage, ref, uploadBytes, getDownloadURL, addDoc, collection, serverTimestamp, query, where, orderBy, onSnapshot, updateDoc, doc } from '../firebase';
+import { db, storage, ref, uploadBytes, getDownloadURL, addDoc, collection, serverTimestamp, query, where, orderBy, onSnapshot, updateDoc, doc, limit } from '../firebase';
 import { compressImage, compressVideo } from '../lib/compression';
 
 interface Message {
@@ -159,7 +159,7 @@ const ShopWorkspace: React.FC<ShopWorkspaceProps> = ({
 
   useEffect(() => {
     if (!shopData.id) return;
-    const q = query(collection(db, 'posts'), where('sellerId', '==', shopData.id), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'posts'), where('sellerId', '==', shopData.id), orderBy('createdAt', 'desc'), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       setLocalPosts(postsData);
