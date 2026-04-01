@@ -500,7 +500,9 @@ export default function App() {
   }, [user]);
 
   const toggleSave = React.useCallback(async (postId: string) => {
+    console.log("toggleSave called for:", postId);
     if (!user) {
+      console.log("No user, redirecting to Profile");
       setActiveTab('Profile');
       return;
     }
@@ -514,11 +516,14 @@ export default function App() {
     try {
       const saveDoc = await getDoc(saveRef);
       if (saveDoc.exists()) {
+        console.log("Removing save");
         await deleteDoc(saveRef);
       } else {
+        console.log("Adding save");
         await setDoc(saveRef, { uid: user.uid, postId, createdAt: new Date().toISOString() });
       }
     } catch (error) {
+      console.error("Error in toggleSave:", error);
       handleFirestoreError(error, OperationType.WRITE, `saved_items/${user.uid}_${postId}`);
     }
   }, [user]);

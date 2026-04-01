@@ -301,7 +301,13 @@ const ReelItem: React.FC<{
           whileTap={{ scale: 0.8 }}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleSave();
+            console.log("Save button clicked for reel post:", post.id);
+            if (onToggleSave) {
+              console.log("onToggleSave is defined, calling it.");
+              onToggleSave();
+            } else {
+              console.log("onToggleSave is NOT defined.");
+            }
           }} 
           className={`w-9 h-9 flex items-center justify-center transition-all ${post.isSaved ? 'text-accent-blue' : 'text-white drop-shadow-lg'}`}
         >

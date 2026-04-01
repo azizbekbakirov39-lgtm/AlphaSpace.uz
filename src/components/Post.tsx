@@ -422,7 +422,13 @@ const Post: React.FC<PostProps> = ({
           whileTap={{ scale: 0.8 }}
           onClick={(e) => {
             e.stopPropagation();
-            if (onToggleSave) onToggleSave();
+            console.log("Save button clicked for post:", post.id);
+            if (onToggleSave) {
+              console.log("onToggleSave is defined, calling it.");
+              onToggleSave();
+            } else {
+              console.log("onToggleSave is NOT defined.");
+            }
           }}
           className={`transition-colors duration-300 ${post.isSaved ? 'text-accent-blue' : 'text-text-primary'}`}
         >
