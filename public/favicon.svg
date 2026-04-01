@@ -19,12 +19,12 @@
     <circle cx="6.5" cy="6.5" r="1.2" fill="#3B82F6" />
     
     <!-- A.S Text (Straight and centered) -->
-    <text x="11" y="13" class="text-as" text-anchor="middle">A.S</text>
+    <text x="11" y="14" class="text-as" text-anchor="middle">A.S</text>
     
     <!-- String -->
     <path d="M6.5 6.5C4 6.5 -1 4.5 -3 2M6.5 6.5C5 8.5 -1 9 -3 7" stroke="white" stroke-width="1.0" stroke-linecap="round" opacity="0.8" fill="none" />
   </g>
   
-  <!-- AlphaSpace Text (1.2x larger and moved up) -->
-  <text x="256" y="410" font-family="'Dancing Script', cursive" font-size="72" font-weight="700" fill="white" text-anchor="middle">AlphaSpace</text>
+  <!-- AlphaSpace Text (1.1x larger) -->
+  <text x="256" y="410" font-family="'Dancing Script', cursive" font-size="79" font-weight="700" fill="white" text-anchor="middle">AlphaSpace</text>
 </svg>
